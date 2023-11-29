@@ -65,9 +65,11 @@ cs282a_test contains a small toy example for running inference but one can also 
 The fifth step was to load up the whole-genome inference files and create scatterplots, genomic track plots, and simple biological analyses. We also calculated head-to-head Pearson and Spearman correlations. It is evident that the three large bin models perform about the same, while the linear probe (which has a harder, noisier task AND fewer parameters to work with) performs worse, but still clearly captures some of the major trends in the test set.
 
 ### How to run a test:
-To set up your environment, create a conda environment with python=3.8, activate it, and run `pip install -r requirements.txt` from within the basenji2_cs282a_cpg-lmnb1 directory. We have tested this on Linux and it may have problems on Mac or Windows.
+Requires about 4GB of disk space and may work best running Linux.
 
-Then, set up the environment to be used as a jupyter kernel and download the datasets specified in the visualization_tracks.ipynb notebook into the cs282a_test folder. 
+Clone the repo to your machine (size is about 1.6GB), 'git clone https://github.com/OberonDixon/basenji2_cs282a_cpg-lmnb1/'. To set up your environment, create a conda environment with python=3.8, activate it, and run `pip install -r requirements.txt` from within the basenji2_cs282a_cpg-lmnb1 directory. We have tested this on Linux and it may have problems on Mac or Windows.
+
+Then, set up the environment to be used as a jupyter kernel and download the datasets specified in the visualization_tracks.ipynb notebook into the cs282a_test folder (total size is about 2.2GB). 
 
 python -m ipykernel install --user --name cs282a_test --display-name "cs282a_test"
 
