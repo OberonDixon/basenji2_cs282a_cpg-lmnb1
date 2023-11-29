@@ -10,3 +10,4 @@ tqdm
 scipy
 pysam
 scikit-learn
+ipykernel
