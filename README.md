@@ -36,7 +36,7 @@ For the linear probe, we adapted the final linear transform layer to do a 1-D CN
 
 ### How the Code Base Works
 
-#### General Overview
+### General Overview
 
 This code base is based on a fork of the Calico Basenji repository. Basenji provides code to build a class of convolutional models to predict gene expression from sequence, coming out of a series of publications starting with Basset in 2016 and continuing into 2023 with the new Borzoi model.
 
@@ -44,11 +44,19 @@ Models are constructed with the seqnn class. We used a parameter set provided wi
 
 Basenji2 is trained using both a human and mouse genome, but we only focused on the human targets because our fine-tuning data is for the human genome. In the cs282a_test folder you can find a copy of the sequences.bed file that specifies the test/train/validation split of the human genome: there are 23 chromosomes (Y is omitted in many of these sorts of models) which are between 250 million and 50 million base pairs (A, T, C, or G) long. The Basenji2 architecture predicts in 128bp bins with a receptive field of about 20kbp, and predicts on regions of 131kb at a time to yield an output vector of lenght 896. Thus the training set contains 131kb chunks of the genome which are used as inputs to predict genomic state information from 114688bp of that sequence (so that all predictions have roughly full receptive field).
 
-Our first step was to pull out embeddings using the code in cs282a_embeddings. This involves downloading the cross2020 model (see manuscripts/cross2020) and human reference genome hg38 (https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz) then going through the sequences.bed file and using pysam to pull out the relevant sequences and using the basenji dna_io module to one hot encode. We can then run model inference, using seqnn's embedding-extraction functionality to go down one layer from the outputs and grab an 896x1536 embeddings vector for each input and save that to an hdf5 file. The file is about 100GB in size and is stored/downloadable from wget https://cs282-datasets.s3.us-west-1.amazonaws.com/embeddings.h5 (we also describe code later for how to download subsets).
+#### Embeddings of Basenji2
+
+Our first step was to pull out embeddings using the code in cs282a_embeddings. This involves downloading the cross2020 model (see manuscripts/cross2020 for the code we used, and https://drive.google.com/drive/folders/1hgjXinKLIWnjFK4c5hvYCq_NOuS0Pnu-?usp=sharing for a copy of the relevant files) and human reference genome hg38 (https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz) then going through the sequences.bed file and using pysam to pull out the relevant sequences and using the basenji dna_io module to one hot encode. We can then run model inference, using seqnn's embedding-extraction functionality to go down one layer from the outputs and grab an 896x1536 embeddings vector for each input and save that to an hdf5 file. The file is about 100GB in size and is stored/downloadable from wget https://cs282-datasets.s3.us-west-1.amazonaws.com/embeddings.h5 (we also describe code later for how to download subsets).
+
+#### Preparing/preprocessing labels
 
 The second step was to prepare labels using 'process_cpg,lmnb1_by_bin.ipynb'. We downloaded the genomic tracks from Shah et al, 2023 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9869549/, see data availability) and also two low read depth DiMeLo seq runs (https://www.nature.com/articles/s41592-022-01475-6). For dimelo data, .bam files (available here, https://drive.google.com/drive/folders/1ZA8nlNrMW8K0ATsqDp4TM_5mEDTlK9Gs?usp=drive_link) were converted to .bigwig files using 'process_dimelo-to-bigwig.py' run via 'sbatch_gm-to-bigwig.sh' and 'sbatch_hek-to-bigwig.sh' using the arbitrary basemod dev version of the dimelo package, https://github.com/OberonDixon/dimelo/tree/arbitrary_basemod_dev. Then in cs282a_preprocessing there is code to load these datasets in chunks per sequences.bed (including a coordinate transformation using pyLiftOver for DiMeLo seq data, which is aligned to a more complete/newer reference genome for which liftover chain files are available from UCSC), scale them to be approximately 0-500 (same as the preprocessing for Basenji2), create 128bp bins and 114688bp bins, and save to an hdf5 file called dataset_14-lmnb1_4-cpg.h5 (downloadable from https://drive.google.com/drive/folders/1ZA8nlNrMW8K0ATsqDp4TM_5mEDTlK9Gs?usp=drive_link).
 
+#### Training feature extractions
+
 The third step was to train different feature extraction models. There are folders for each of cs282a_linear-probing, cs282a_conv1d_perceptron, cs282a_perceptron-maxpool, and cs282a_self-attention. The linear probing model was trained using code that pulls segments of the embeddings directly from aws, so is most easily reproducible by someone without a bigmem node. However, this same approach is possible (albeit slow) for the other models as well, though the current training code is for training with the full dataset in ~200GB of memory on the Savio high performance cluster. Models are trained with pytorch and saved with the pytorch dict saving method. Test/train/validation split followed the specifications of sequences.bed. Training curves are available in our report.
+
+#### Checking performance
 
 The fourth step was to run inference for the full test/train/validation dataset and save the results to .h5 files. For the three large bin models, these are saved in the cs282a_test folder. For the linear probe, the file is about 2GB and available here under the name probe_first_full_run.h5: https://drive.google.com/drive/folders/1ZA8nlNrMW8K0ATsqDp4TM_5mEDTlK9Gs?usp=drive_link.
 
@@ -56,7 +64,7 @@ cs282a_test contains a small toy example for running inference but one can also 
 
 The fifth step was to load up the whole-genome inference files and create scatterplots, genomic track plots, and simple biological analyses. We also calculated head-to-head Pearson and Spearman correlations. It is evident that the three large bin models perform about the same, while the linear probe (which has a harder, noisier task AND fewer parameters to work with) performs worse, but still clearly captures some of the major trends in the test set.
 
-#### How to run a test:
+### How to run a test:
 To set up your environment, run `pip install -r requirements.txt`. Our models are in pytorch, although if you want to run model inference on basenji with our code you'll need to create a basenji environment as described in the Basenji section. It is within the realm of possibility that we have missed some dependencies here; you should be fine to use pip to install basically anything we use in the code. We endeavor to clean up the dependencies in the final submission. Also note that dependencies for these test files may be different from those for some of the model training, which are again different from those for embeddings extraction, and different again from those for DiMeLo-seq data processing. Each should be done in a different conda environment if you want to run all of those. Other than the basenji package and the dimelo arbitrary_basemod_dev branch, you may also require various biopython installations such as pysam, pyBigWig, pyLiftOver, pybedtools, and so on.
 
 Peer reviewers have two simple tests available, along with all the code for running inference to get embeddings and training feature extraction models: 
@@ -65,7 +73,7 @@ Peer reviewers have two simple tests available, along with all the code for runn
 
 2) Use pre-loaded predictions to replicate biologically relevant genome plots using visualize_tracks.ipynb (this will require downloading some large-ish datasets).
 
-#### Explanation of files:
+### Explanation of files:
 This repo includes files which come from the original Banseji2 repo, and files that we created for our project. We put them all together because depending on how deep you want to dive in, you might need files from the original repo. Our files all start with the prefix “cs282a.”
 
 Cs282a_conv1d_perceptron
