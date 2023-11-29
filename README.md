@@ -46,11 +46,11 @@ Basenji2 is trained using both a human and mouse genome, but we only focused on 
 
 Our first step was to pull out embeddings using the code in cs282a_embeddings. This involves downloading the cross2020 model (see manuscripts/cross2020) and human reference genome hg38 (https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz) then going through the sequences.bed file and using pysam to pull out the relevant sequences and using the basenji dna_io module to one hot encode. We can then run model inference, using seqnn's embedding-extraction functionality to go down one layer from the outputs and grab an 896x1536 embeddings vector for each input and save that to an hdf5 file. The file is about 100GB in size and is stored/downloadable from wget https://cs282-datasets.s3.us-west-1.amazonaws.com/embeddings.h5 (we also describe code later for how to download subsets).
 
-The second step was to prepare labels. We downloaded the genomic tracks from Shah et al, 2023 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9869549/, see data availability) and also two low read depth DiMeLo seq runs (https://www.nature.com/articles/s41592-022-01475-6). Then in cs282a_preprocessing there is code to load these datasets in chunks per sequences.bed (including a coordinate transformation using pyLiftOver for DiMeLo seq data, which is aligned to a more complete/newer reference genome for which liftover chain files are available from UCSC), scale them to be approximately 0-500 (same as the preprocessing for Basenji2), create 128bp bins and 114688bp bins, and save to an hdf5 file called dataset_14-lmnb1_4-cpg.h5 (downloadable from ).
+The second step was to prepare labels. We downloaded the genomic tracks from Shah et al, 2023 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9869549/, see data availability) and also two low read depth DiMeLo seq runs (https://www.nature.com/articles/s41592-022-01475-6). Then in cs282a_preprocessing there is code to load these datasets in chunks per sequences.bed (including a coordinate transformation using pyLiftOver for DiMeLo seq data, which is aligned to a more complete/newer reference genome for which liftover chain files are available from UCSC), scale them to be approximately 0-500 (same as the preprocessing for Basenji2), create 128bp bins and 114688bp bins, and save to an hdf5 file called dataset_14-lmnb1_4-cpg.h5 (downloadable from https://drive.google.com/drive/folders/1ZA8nlNrMW8K0ATsqDp4TM_5mEDTlK9Gs?usp=drive_link).
 
 The third step was to train different feature extraction models. There are folders for each of cs282a_linear-probing, cs282a_conv1d_perceptron, cs282a_perceptron-maxpool, and cs282a_self-attention. The linear probing model was trained using code that pulls segments of the embeddings directly from aws, so is most easily reproducible by someone without a bigmem node. However, this same approach is possible (albeit slow) for the other models as well, though the current training code is for training with the full dataset in ~200GB of memory on the Savio high performance cluster. Models are trained with pytorch and saved with the pytorch dict saving method. Test/train/validation split followed the specifications of sequences.bed. Training curves are available in our report.
 
-The fourth step was to run inference for the full test/train/validation dataset and save the results to .h5 files. For the three large bin models, these are saved in the cs282a_test folder. For the linear probe, the file is about 2GB and available here:.
+The fourth step was to run inference for the full test/train/validation dataset and save the results to .h5 files. For the three large bin models, these are saved in the cs282a_test folder. For the linear probe, the file is about 2GB and available here under the name probe_first_full_run.h5: https://drive.google.com/drive/folders/1ZA8nlNrMW8K0ATsqDp4TM_5mEDTlK9Gs?usp=drive_link.
 
 cs282a_test contains a small toy example for running inference but one can also re-run large fractions of the genome. On a high-performance computer it should be very quick, bottlenecked by loading embeddings. 
 
@@ -67,18 +67,31 @@ Peer reviewers have two simple tests available, along with all the code for runn
 
 #### Explanation of files:
 This repo includes files which come from the original Banseji2 repo, and files that we created for our project. We put them all together because depending on how deep you want to dive in, you might need files from the original repo. Our files all start with the prefix “cs282a.”
+
 Cs282a_conv1d_perceptron
+
 Run mlp_extraction_inference.ipynb to obtain predictions from the model.
+
 Cs282a_embeddings
+
 You don’t have to run this.
+
 Basenji_embeddings.ipynb is where we ran inference on the original Basenji2 model with the original input data/labels to obtain the penultimate embeddings
+
 Cs282a_linear-probing
+
 Run linear_probing_inference.ipynb to obtain predictions.
+
 Cs282a_perceptron-maxpool
+
 Run maxpool-perceptron_extraction_inference.ipynb to obtain predictions.
+
 Cs282a_preprocessing
+
 You don’t have to run this. Preprocesses the human epigenetic factor tracks. 
+
 Cs282a_self-attention
+
 Run transformer_inference.ipynb to obtain predictions.
 
 
