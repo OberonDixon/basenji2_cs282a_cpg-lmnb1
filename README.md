@@ -1,6 +1,65 @@
+# CS282A Project
+#### Oberon Dixon-Luinenburg (BioE PhD student, Ioannidis and Streets labs), Stephanie Brener (BioE PhD student, Little lab), Jimin Jung (CS/DS), Ujjwal Krishnamurthi (CS/DS), Sriteja Vijapurapu (CS)
+
+This project applies four methods of fine tuning on the pre-trained Basenji2 model to predict markers of gene expression from a full human genome sequence. We already conducted all embedding extraction and fine tuning training, and here request our reviewers to replicate validation on test data and illustrate prediction accuracy via the descriptions below. 
+
+#### Biology background:
+There are two novel markers of gene expression that we sought to predict in this work. The first is CpG methylation, where large stretches of CGCG base pairs with a methyl group on the C located near DNA promoters lead to repressed gene expression, and no CpG methylation leads to more gene expression. The second is nuclear lamina association, where DNA that is closer to the edge of the nucleus experiences less gene expression, and DNA that is in the center of the nucleus has more gene expression. 
+	Current models which seek to predict gene expression given a human genome sequence do not capture these known effects of CpG methylation and nuclear lamina association on gene expression. Our goal is to fine tune the pre-trained Basenji2 model with these new labels to improve overall gene expression prediction beyond the current ~80% accuracy by incorporating these effects.
+
+#### Basenji2 model architecture:
+This model has three parts:
+7 CNN heads
+CNN
+GeLU
+Max pool
+11 Dilated CNN heads
+Dilated CNN
+Skip connection
+1 Linear transform
+1-D CNN
+
+To prepare for fine tuning, we extracted the embeddings from the penultimate layer (before the linear transform) by running inference with the original data and saved model parameters. In fine tuning, we then used the same original data but added 18 new labels to the data which come from CpG methylation and nuclear lamina association tracks.
+
+#### Our fine tuning approaches:
+We applied three different fine tuning methods covering a range of complexity to see which method would lead to greater prediction accuracy using our new labels.
+Linear probe
+Convolutional perceptron
+Max-pool perceptron
+Transformer with self attention
+
+For the linear probe, we adapted the final linear transform layer to do a 1-D CNN on our new labels. This sought to check if the pretrained model with no adaptations could accurately predict our new labels. We then sought to apply feature extraction by training three different smaller networks on top of the pre-trained Basenji model. In the first case, we created a convolutional perceptron and fed the pre-trained embeddings into it with the new labels. In the second case, we created a max-pool perceptron. In the third case, we created a transformer with self attention. Our goal with the first two is that they are a simpler network which should capture information from the new labels and be quicker networks to train. For the transformer, we expect this to have a more successful impact in prediction accuracy because it is a more comprehensive model which will look across the genomic sequence and due to self attention, incorporate more information shared across the genome. 
+
+#### How to run a test:
+To set up your environment, run `pip install -r requirements.txt`. Our models are in pytorch, although if you want to run model inference on basenji with our code you'll need to create a basenji environment as described in the Basenji section.
+
+Peer reviewers have two simple tests available, along with all the code for running inference to get embeddings and training feature extraction models: 
+
+1) Run inference with sample_inference.ipynb on each of the four models.
+
+2) Use pre-loaded predictions to replicate biologically relevant genome plots using visualize_tracks.ipynb (this will require downloading some large-ish datasets).
+
+#### Explanation of files:
+This repo includes files which come from the original Banseji2 repo, and files that we created for our project. We put them all together because depending on how deep you want to dive in, you might need files from the original repo. Our files all start with the prefix “cs282a.”
+Cs282a_conv1d_perceptron
+Run mlp_extraction_inference.ipynb to obtain predictions from the model.
+Cs282a_embeddings
+You don’t have to run this.
+Basenji_embeddings.ipynb is where we ran inference on the original Basenji2 model with the original input data/labels to obtain the penultimate embeddings
+Cs282a_linear-probing
+Run linear_probing_inference.ipynb to obtain predictions.
+Cs282a_perceptron-maxpool
+Run maxpool-perceptron_extraction_inference.ipynb to obtain predictions.
+Cs282a_preprocessing
+You don’t have to run this. Preprocesses the human epigenetic factor tracks. 
+Cs282a_self-attention
+Run transformer_inference.ipynb to obtain predictions.
+Cs292a_test
+
+
 <img src="docs/basset_image.png" width="200">
 
-# Basenji
+# Basenji (pre-existed code base)
 #### Sequential regulatory activity predictions with deep convolutional neural networks.
 
 Basenji provides researchers with tools to:

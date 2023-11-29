@@ -1,0 +1,7 @@
+tensorboard
+torch
+h5py
+fsspec
+numpy
+requests
+aiohttp

@@ -1,0 +1,3 @@
+# CS 282 MLP Version 1 (Rough)
+
+This repository was thrown together quickly by me to highlight some of the work/progress I've made on the MLP model and its use for modelling gene expression grammar. In order to set up, run the command `pip install -r requirements.txt` and add the file `dataset_14-lmnb1_4-cpg.h5` to the root of this project. Additionally, create a folder named `runs/` in the root of this project and you should be good to go. 

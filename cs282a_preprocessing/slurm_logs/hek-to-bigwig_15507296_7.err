@@ -1,0 +1,3 @@
+/tmp/tmp1o05d9xd: line 3: /clusterfs/nilah/oberon/basenji2_cs282a_cpg-lmnb1/cs282a_preprocessing/process_dimelo-to-bigwig.py: Permission denied
+
+ERROR conda.cli.main_run:execute(47): `conda run /clusterfs/nilah/oberon/basenji2_cs282a_cpg-lmnb1/cs282a_preprocessing/process_dimelo-to-bigwig.py --chromosome chr7 --output_folder /global/scratch/users/dixonluinenburg/cs282a_preprocessing/ --bam_file /clusterfs/nilah/oberon/datasets/dimelo_mA-mGpC/lmnb1-accessibility_20220214_megalodon/barcode10_rabbit-abcam/mod_mappings.10.sorted.bam --name hek293_dimelo_feb2022 --reference_genome /clusterfs/nilah/oberon/genomes/chm13.draft_v1.1.fasta` failed. (See above for error)

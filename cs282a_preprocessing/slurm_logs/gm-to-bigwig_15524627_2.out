@@ -1,0 +1,55 @@
+chr2:0-242696752
+gm12878_dimelo_feb2022_chr2
+bases in batch (batch size exceeded) 10008546
+bases in batch (core allotment reached) 2459125
+bases in batch (batch size exceeded) 10010459
+bases in batch (core allotment reached) 2456769
+bases in batch (batch size exceeded) 10007283
+bases in batch (core allotment reached) 2459587
+bases in batch (batch size exceeded) 10014405
+bases in batch (core allotment reached) 2462002
+bases in batch (batch size exceeded) 10000087
+bases in batch (core allotment reached) 2470137
+bases in batch (batch size exceeded) 10004978
+bases in batch (core allotment reached) 2462049
+bases in batch (batch size exceeded) 10033410
+bases in batch (core allotment reached) 2436897
+bases in batch (batch size exceeded) 10012217
+bases in batch (core allotment reached) 2458761
+bases in batch (batch size exceeded) 10004415
+bases in batch (core allotment reached) 2466592
+bases in batch (batch size exceeded) 10003186
+bases in batch (core allotment reached) 2469977
+bases in batch (batch size exceeded) 10007723
+bases in batch (core allotment reached) 2458954
+bases in batch (batch size exceeded) 10017998
+bases in batch (core allotment reached) 2448420
+bases in batch (batch size exceeded) 10000780
+bases in batch (core allotment reached) 2469141
+bases in batch (batch size exceeded) 10000947
+bases in batch (core allotment reached) 2466359
+bases in batch (batch size exceeded) 10000671
+bases in batch (core allotment reached) 2467838
+bases in batch (batch size exceeded) 10018311
+bases in batch (core allotment reached) 2458564
+bases in batch (batch size exceeded) 10031281
+bases in batch (core allotment reached) 2461922
+bases in batch (batch size exceeded) 10012947
+bases in batch (core allotment reached) 2460261
+bases in batch (batch size exceeded) 10004709
+bases in batch (core allotment reached) 2464730
+bases in batch (batch size exceeded) 10019873
+bases in batch (core allotment reached) 2458981
+bases in batch (batch size exceeded) 10000762
+bases in batch (core allotment reached) 2465039
+bases in batch (batch size exceeded) 10000620
+bases in batch (core allotment reached) 2489311
+bases in batch (batch size exceeded) 10009552
+bases in batch (core allotment reached) 2465030
+bases in batch (batch size exceeded) 10005432
+bases in batch (last for core) 2309940
+Starting up parallel processes, tasklist took 1.8408756256103516
+Starting merge, parallel processing took 282.570556640625
+bigwig
+Merge took 4089.1306064128876
+
