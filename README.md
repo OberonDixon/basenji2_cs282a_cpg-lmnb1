@@ -21,7 +21,7 @@ Skip connection
 
 To prepare for fine tuning, we extracted the embeddings from the penultimate layer (before the linear transform) by running inference with the original data and saved model parameters. In fine tuning, we then used the same original data but added 18 new labels to the data which come from CpG methylation and nuclear lamina association tracks.
 
-#### Our fine tuning approaches:
+#### Our feature extraction approaches:
 We applied three different fine tuning methods covering a range of complexity to see which method would lead to greater prediction accuracy using our new labels.
 
 1) Linear probe
@@ -30,7 +30,7 @@ We applied three different fine tuning methods covering a range of complexity to
 
 3) Max-pool perceptron
 
-4) Transformer with self attention
+4) Transformer
 
 For the linear probe, we adapted the final linear transform layer to do a 1-D CNN on our new labels. This sought to check if the pretrained model with no adaptations could accurately predict our new labels. We then sought to apply feature extraction by training three different smaller networks on top of the pre-trained Basenji model. In the first case, we created a convolutional perceptron and fed the pre-trained embeddings into it with the new labels. In the second case, we created a max-pool perceptron. In the third case, we created a transformer with self attention. Our goal with the first two is that they are a simpler network which should capture information from the new labels and be quicker networks to train. For the transformer, we expect this to have a more successful impact in prediction accuracy because it is a more comprehensive model which will look across the genomic sequence and due to self attention, incorporate more information shared across the genome. 
 
@@ -46,17 +46,25 @@ Basenji2 is trained using both a human and mouse genome, but we only focused on 
 
 #### Embeddings of Basenji2
 
+See additional README in cs282a_embeddings
+
 Our first step was to pull out embeddings using the code in cs282a_embeddings. This involves downloading the cross2020 model (see manuscripts/cross2020 for the code we used, and https://drive.google.com/drive/folders/1hgjXinKLIWnjFK4c5hvYCq_NOuS0Pnu-?usp=sharing for a copy of the relevant files) and human reference genome hg38 (https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz) then going through the sequences.bed file and using pysam to pull out the relevant sequences and using the basenji dna_io module to one hot encode. We can then run model inference, using seqnn's embedding-extraction functionality to go down one layer from the outputs and grab an 896x1536 embeddings vector for each input and save that to an hdf5 file. The file is about 100GB in size and is stored/downloadable from wget https://cs282-datasets.s3.us-west-1.amazonaws.com/embeddings.h5 (we also describe code later for how to download subsets).
 
 #### Preparing/preprocessing labels
+
+See additional README in cs282a_processing
 
 The second step was to prepare labels using 'process_cpg,lmnb1_by_bin.ipynb'. We downloaded the genomic tracks from Shah et al, 2023 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9869549/, see data availability) and also two low read depth DiMeLo seq runs (https://www.nature.com/articles/s41592-022-01475-6). For dimelo data, .bam files (available here, https://drive.google.com/drive/folders/1ZA8nlNrMW8K0ATsqDp4TM_5mEDTlK9Gs?usp=drive_link) were converted to .bigwig files using 'process_dimelo-to-bigwig.py' run via 'sbatch_gm-to-bigwig.sh' and 'sbatch_hek-to-bigwig.sh' using the arbitrary basemod dev version of the dimelo package, https://github.com/OberonDixon/dimelo/tree/arbitrary_basemod_dev. Then in cs282a_preprocessing there is code to load these datasets in chunks per sequences.bed (including a coordinate transformation using pyLiftOver for DiMeLo seq data, which is aligned to a more complete/newer reference genome for which liftover chain files are available from UCSC), scale them to be approximately 0-500 (same as the preprocessing for Basenji2), create 128bp bins and 114688bp bins, and save to an hdf5 file called dataset_14-lmnb1_4-cpg.h5 (downloadable from https://drive.google.com/drive/folders/1ZA8nlNrMW8K0ATsqDp4TM_5mEDTlK9Gs?usp=drive_link).
 
 #### Training feature extractions
 
+See additional READMEs in cs282a_linear-probing, cs282a_conv1d_perceptron, cs282a_perceptron-maxpool, and cs282a_self-attention
+
 The third step was to train different feature extraction models. There are folders for each of cs282a_linear-probing, cs282a_conv1d_perceptron, cs282a_perceptron-maxpool, and cs282a_self-attention. The linear probing model was trained using code that pulls segments of the embeddings directly from aws, so is most easily reproducible by someone without a bigmem node. However, this same approach is possible (albeit slow) for the other models as well, though the current training code is for training with the full dataset in ~200GB of memory on the Savio high performance cluster. Models are trained with pytorch and saved with the pytorch dict saving method. Test/train/validation split followed the specifications of sequences.bed. Training curves are available in our report.
 
 #### Checking performance
+
+See additional README in cs282a_test
 
 The fourth step was to run inference for the full test/train/validation dataset and save the results to .h5 files. For the three large bin models, these are saved in the cs282a_test folder. For the linear probe, the file is about 2GB and available here under the name probe_first_full_run.h5: https://drive.google.com/drive/folders/1ZA8nlNrMW8K0ATsqDp4TM_5mEDTlK9Gs?usp=drive_link.
 
@@ -77,7 +85,7 @@ Peer reviewers have two simple tests available, along with all the code for runn
 
 1) Run inference with sample_inference.ipynb on each of the four models.
 
-2) Use pre-loaded predictions to replicate biologically relevant genome plots using visualize_tracks.ipynb (this will require downloading some large-ish datasets).
+2) Use pre-loaded predictions to replicate biologically relevant genome plots using visualize_tracks.ipynb (this will require downloading some large-ish datasets). NOTE: if you have limited memory, you may want to run on a subset of chromosomes - simply take a slice of the list.
 
 Our models are in pytorch, although if you want to run model inference on basenji with our code you'll need to create a basenji environment as described in the Basenji section. Also note that dependencies for these test files are different from those for some of the model training, which are again different from those for embeddings extraction, and different again from those for DiMeLo-seq data processing. Each should be done in a different conda environment if you want to run all of those. Other than the basenji package and the dimelo arbitrary_basemod_dev branch, you may also require various biopython installations such as pysam, pyBigWig, pyLiftOver, pybedtools, and so on.
 
